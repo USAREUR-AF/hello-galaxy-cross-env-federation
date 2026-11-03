@@ -46,8 +46,9 @@ Federation is the exception, for a partner who must own their own authority and 
 ## The stages
 
 Stages 01–04 need no goatnet, no cloud and no credentials. Stage 05 needs Docker and the
-`saltlick` image; 05b a running directory. Stages 06–12 need goatnets you operate, with a
-federation edge on each, and the prerequisites listed in `STAGES.md`; without them they skip and the
+`saltlick` image; 05b a running directory. Stages 06–12 need two goatnets you have access to,
+with a federation edge on each put there by their operators (you, if you are one), and the
+prerequisites listed in `STAGES.md`; without them they skip and the
 runner's last line says how many skipped.
 
 | | Stage | Needs |
@@ -66,7 +67,7 @@ runner's last line says how many skipped.
 | 11 | The round trip — the one check the sending side can make alone | two goatnets |
 | 12 | A federated partner in an audience | two goatnets with `grant-keyd` and SPIRE federation |
 
-To stand up goatnets of your own, start from goatcore's
+Any appropriate pair of goatnets works. To stand up a pair yourself, start from goatcore's
 [`docs/tutorials/00-goatlite.md`](https://github.com/usareur-af/goatcore/blob/main/docs/tutorials/00-goatlite.md)
 and [`docs/tutorials/04-two-sovereigns.md`](https://github.com/usareur-af/goatcore/blob/main/docs/tutorials/04-two-sovereigns.md);
 the operator procedure is
