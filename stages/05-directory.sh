@@ -50,9 +50,9 @@ python3 "$HG_ROOT/lib/make_directory_entry.py" "$B" xaa "$P" >/dev/null 2>&1 \
 IP=$(docker inspect "$C" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null)
 docker cp "$P" "$C:/tmp/pkg.json" >/dev/null 2>&1 || true
 
-res=$(docker run --rm --network "container:$C" -v "$HG_ROOT/lib:/lib:ro" -v "$B:/b:ro" -v "$HG_ROOT/.work:/work:ro" \
+res=$(docker run --rm --network "container:$C" -v "$HG_ROOT/lib:/hg-lib:ro" -v "$B:/b:ro" -v "$HG_ROOT/.work:/work:ro" \
         python:3.12-alpine sh -c 'pip install -q cryptography >/dev/null 2>&1;
-        python3 /lib/saltlick_put.py http://127.0.0.1:8080 xaa /work/dir-xaa.json /b/vectors/testkeys/xaa.seed.hex' 2>/dev/null)
+        python3 /hg-lib/saltlick_put.py http://127.0.0.1:8080 xaa /work/dir-xaa.json /b/vectors/testkeys/xaa.seed.hex' 2>/dev/null)
 code=${res%% *}
 if [ "$code" = "201" ] || [ "$code" = "200" ]; then
   ok "a signed package is accepted for publication (HTTP $code)"
@@ -65,9 +65,9 @@ if [ "$code" = "201" ] || [ "$code" = "200" ]; then
 
   # Trust on first use: a package signed by a key nobody bound is a package that
   # authenticates itself, which establishes nothing. It must be refused.
-  res2=$(docker run --rm --network "container:$C" -v "$HG_ROOT/lib:/lib:ro" -v "$B:/b:ro" -v "$HG_ROOT/.work:/work:ro" \
+  res2=$(docker run --rm --network "container:$C" -v "$HG_ROOT/lib:/hg-lib:ro" -v "$B:/b:ro" -v "$HG_ROOT/.work:/work:ro" \
           python:3.12-alpine sh -c 'pip install -q cryptography >/dev/null 2>&1;
-          python3 /lib/saltlick_put.py http://127.0.0.1:8080 xaa /work/dir-xaa.json /b/vectors/testkeys/xab.seed.hex' 2>/dev/null)
+          python3 /hg-lib/saltlick_put.py http://127.0.0.1:8080 xaa /work/dir-xaa.json /b/vectors/testkeys/xab.seed.hex' 2>/dev/null)
   assert_eq "a second, unbound key is refused for a bound party" "403" "${res2%% *}"
 else
   no "publication was not accepted" "HTTP $code — $res"
