@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# hello-galaxy-cross-env-federation — the runner.
+set -uo pipefail
+cd "$(dirname "$0")"
+export HG_ROOT="$PWD"
+
+: "${GOAT_BIN:=$(command -v goat || true)}"
+export GOAT_BIN
+
+usage() {
+  echo "usage: ./run [--list] [stage...]"
+  echo "  ./run           every built stage"
+  echo "  ./run 03 04     just those"
+  echo "  ./run --list    what exists and what does not"
+}
+
+if [ "${1:-}" = "--list" ]; then
+  echo "built:"
+  for f in stages/*.sh; do
+    printf "  %-4s %s\n" "$(basename "$f" | cut -d- -f1)" "$(sed -n '2s/^# //p' "$f")"
+  done
+  echo "every stage above is built; see STAGES.md for what each one proves"
+  echo "  09/11 are the data path; 10 is grant-keying inside one goatnet;"
+  echo "  12 is grant-keying ACROSS the boundary and needs both cloud sides"
+  exit 0
+fi
+[ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ] && { usage; exit 0; }
+
+if [ -z "$GOAT_BIN" ] || [ ! -x "$GOAT_BIN" ]; then
+  echo "no goat binary. Put one on PATH or set GOAT_BIN." >&2
+  echo "Releases: https://github.com/usareur-af/goatcore/releases (goat-cli-v*)" >&2
+  exit 2
+fi
+
+echo
+echo "  goat:   $("$GOAT_BIN" --version 2>/dev/null || echo "$GOAT_BIN")"
+echo "  bundle: $(ls bundle/*.tar.gz 2>/dev/null | head -1 || echo 'will be fetched')"
+
+want=("$@")
+total_fail=0; total_skip=0
+for f in stages/*.sh; do
+  n=$(basename "$f" | cut -d- -f1)
+  if [ ${#want[@]} -gt 0 ]; then
+    match=0; for w in "${want[@]}"; do [ "$w" = "$n" ] && match=1; done
+    [ $match -eq 1 ] || continue
+  fi
+  echo
+  echo "── $n  $(sed -n '2s/^# //p' "$f")"
+  out=$(bash "$f" 2>&1); rc=$?
+  printf '%s\n' "$out"
+  [ $rc -eq 0 ] || total_fail=$((total_fail+1))
+  # count the skip MARKER only — the tally line also contains the word
+  s=$(printf '%s' "$out" | grep -c '^  .*skip.*  ' || true)
+  total_skip=$((total_skip + s))
+done
+
+echo
+if [ $total_fail -ne 0 ]; then
+  echo "  $total_fail STAGE(S) FAILED"
+elif [ $total_skip -ne 0 ]; then
+  # A skip is not a pass. Say so on the last line, where people stop reading.
+  echo "  PASSED, WITH $total_skip CHECK(S) SKIPPED — see the skip lines above for why"
+else
+  echo "  ALL STAGES PASSED"
+fi
+exit $total_fail

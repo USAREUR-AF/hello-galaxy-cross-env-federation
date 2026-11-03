@@ -1,0 +1,34 @@
+name: stages
+on:
+  push: { branches: [main] }
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # The released goat CLI this repository is tested against.
+  GOAT_CLI_RELEASE: goat-cli-v0.5.14
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The released binary, not a build from a working tree. If this repository
+      # ever compiles goat from source it has stopped testing what a partner has.
+      - name: fetch the released goat CLI
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/goat && cd /tmp/goat
+          gh release download "$GOAT_CLI_RELEASE" --repo usareur-af/goatcore \
+            --pattern 'goat-linux-amd64*' --clobber
+          sha256sum -c goat-linux-amd64.sha256
+          mv goat-linux-amd64 goat && chmod +x goat
+          ./goat --version
+          echo "GOAT_BIN=/tmp/goat/goat" >> "$GITHUB_ENV"
+
+      - run: pip install --quiet cryptography
+
+      - name: run every stage
+        run: ./run
