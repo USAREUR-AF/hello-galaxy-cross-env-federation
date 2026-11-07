@@ -8,11 +8,14 @@ env:
   # The released goat CLI this repository is tested against.
   GOAT_CLI_RELEASE: goat-cli-v0.5.14
 
+permissions:
+  contents: read
+
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # The released binary, not a build from a working tree. If this repository
       # ever compiles goat from source it has stopped testing what a partner has.
