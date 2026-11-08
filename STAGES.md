@@ -1,8 +1,8 @@
 # The stages
 
 What each one asserts, and what a failure means. Stages 01–04 need nothing but the `goat` binary;
-stage 05 needs Docker and the `saltlick` image; stage 05b needs a running directory; stages
-06–12 need goatnets and the prerequisites below.
+stages 05 and 05b need Docker and the `saltlick` image, or for 05b a directory at `HG_SALTLICK`;
+stages 06–12 need goatnets and the prerequisites below.
 
 The rule every stage is written to: **a check that cannot fail is not a check.** For each assertion,
 there is a state of the world in which it fails. Where a stage cannot run it **skips loudly** and the
@@ -51,45 +51,52 @@ that sends people re-running everything for three weeks. The tool exists to say 
 
 ## 05 — The directory
 
-Starts the `saltlick` image (`SALTLICK_IMAGE`), then:
+Starts the `saltlick` image (`SALTLICK_IMAGE`) behind a TLS front with a local certificate
+authority (`lib/saltlick_up.sh`). A pointer's `package_url` is `https` by rule, so the directory
+is reached over TLS at the same address the pointer names. Then:
 
-- `/v1/match` returns 404. The directory makes introductions and decides nothing; anything else here
-  means it has started to.
-- `/v1/spec` names the package spec and carries the advisory string.
-- A directory entry carries **no offers**: `transport_offer` and `data_offer` are refused 422,
-  because reachability and release sets are sovereign operational detail that moves directly
-  between the two parties. A conformance package carries offers by design (it exists to exercise
-  composition), so the stage builds the recognition-only shape — spec, sovereign id, identity,
-  issued, expires, capabilities, signature — and re-signs it (`lib/make_directory_entry.py`).
-- A signed entry published to `PUT /v1/parties/<id>` comes back from `GET` **byte-identical**. A
-  directory that re-serialises what it stores has broken the digest every party computes over
-  exactly those bytes.
-- A second, unbound key for a party that already has one is refused **403**. A package carrying its
-  own key authenticates nothing: the first key seen binds, and only that key can hand over to a
-  successor.
+- `/v1/match` returns 404. The directory decides nothing; anything else here means it has started
+  to.
+- `/v1/spec` accepts `saltlick-pointer/v1` and carries the advisory string.
+- A hosted package for a party with no entry is refused **409**. A file never claims a sovereign
+  id; the entry's first write binds the key.
+- xaa's signed pointer is accepted and binds xaa's key on first use. `GET` returns it
+  **byte-identical**, with the bound key in `X-Saltlick-Bound-Key`.
+- A pointer carrying anything beyond its six members — `spec`, `sovereign_id`, `package_url`,
+  `package_sha256`, `expires`, `signature` — is refused **422**.
+- xaa's signed package (offers included) and CA certificate are hosted beside the entry and come
+  back **byte-identical**; the listing links both. A directory that re-serialises what it stores
+  breaks the digest every party computes over exactly those bytes.
+- A second, unbound key is refused **403** for the entry, the package and the CA. The first key
+  seen binds, and only that key writes.
 
-The write is signed the way the service's own tests sign it: `X-Saltlick-Key` and
-`X-Saltlick-Signature` over `saltlick-request/v1 \n METHOD \n <id> \n sha256:<hex> \n <key> \n`.
-
-saltlick binds `127.0.0.1` by design and this stage does not ask it to bind wider — it joins the
-container's network namespace instead. The bind is a property worth preserving.
+`lib/make_directory_entry.py` builds what a party publishes: a CA certificate of its own, the
+`compose-full` conformance package with `identity.ca_fingerprint` set to that CA's SHA-256 and
+re-signed with the party's test key, and the pointer to it. Every write is signed the way the
+service requires (`lib/saltlick_put.py`): `X-Saltlick-Key` and `X-Saltlick-Signature` over
+`saltlick-request/v1 \n PUT \n <resource> \n sha256:<hex> \n <key> \n`, where the resource is
+`xaa`, `xaa/package` or `xaa/ca`.
 
 ---
 
-## 05b — The directory used end to end
+## 05b — Two parties federate through the directory
 
-Stage 05 proves the service behaves; 05b proves it is useful. The directory holds recognition only,
-so it cannot hand anyone a link. What it does is let a party you have never met be **found**, and
-then let the package that arrives directly be **corroborated** against what that party published.
+The flow the goatcore federation driver runs in phase 5 (`FED_DIRECTORY_URL`,
+`FED_COUNTERPARTY_ID`, `FED_SIGNING_KEY`, `FED_CA_CERT`), played for both parties on one machine.
+It uses `HG_SALTLICK` — the https URL of a directory, with `HG_SALTLICK_CA` for a private CA — or
+starts one as stage 05 does. It makes six writes, which fits a directory's default write budget.
 
-| Assertion | Why it is there |
-|---|---|
-| both counterparties are discoverable with no prior relationship | discovery is the service |
-| the entry carries no `transport_offer`, no `data_offer` | recognition only |
-| the entry's signature verifies under the party's own key | self-consistency |
-| the directly-exchanged package agrees with the directory on `ca_fingerprint` and `trust_domain` | corroboration |
-| a package disagreeing with the directory about its own CA is detected | the check can fail |
-| a key the directory never bound is refused at composition, exit 20 | without this the directory is decoration |
+| Step | Assertion | Why it is there |
+|---|---|---|
+| publish | each party's pointer, package and CA are accepted | a party behind NAT needs no public host |
+| the call | each party's verifying key and CA fingerprint are printed in groups of four | the one human binding; the directory caches it and is never its source |
+| fetch | each party finds the other's pointer and fetches the package from its `package_url` | the exchange is machine-driven, with nothing sent out of band |
+| check | the package's sha256 is the pointer's `package_sha256` | the bytes are the bytes the party published |
+| check | the pointer and the package verify under the key read back | the directory is not an input to the check |
+| check | the hosted CA's SHA-256 is the package's `identity.ca_fingerprint` | the trust anchor is the one the package names |
+| refusal | a package altered by one value fails the digest; a CA that disagrees with the fingerprint is detected; a pointer signed by any other key fails | each check can fail |
+| compose | each party composes its own package with the one it fetched, and both reach the same digest | the agreement has no perspective; reading the digest back is the last human act |
+| refusal | a key the directory never bound is refused at composition, exit 20 | without this the read-back is decoration |
 
 Being listed grants no access, establishes no authority to connect, and does not establish that a
 party is who it claims to be.
