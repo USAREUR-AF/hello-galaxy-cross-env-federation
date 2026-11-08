@@ -18,7 +18,7 @@ consumes the interfaces that exist for a counterparty:
 |---|---|
 | `goat` CLI | a released binary from [`usareur-af/goatcore` releases](https://github.com/usareur-af/goatcore/releases) |
 | The federation bundle | `federation-package-spec.md`, the conformance vectors and `verify-bundle.sh`, exactly as a counterparty receives them (`bundle/`) |
-| `saltlick` | the peering-directory image, used by stage 05 |
+| `saltlick` | the peering-directory image, used by stages 05 and 05b |
 
 If it runs green, the flow works for someone holding only those artefacts. If it vendored goat
 source it would prove nothing that `cargo test` does not already prove.
@@ -32,8 +32,10 @@ source it would prove nothing that `cargo test` does not already prove.
 ```
 
 Requirements: `bash`, `python3`, `tar`, and a `goat` binary on `PATH` or at `$GOAT_BIN`.
-Stage 05 additionally needs Docker, `pip install cryptography`, and the `saltlick` image
-(`SALTLICK_IMAGE`, default `ghcr.io/usareur-af/saltlick:v0.1.0`).
+Stages 05 and 05b additionally need `pip install cryptography`, and Docker to run the `saltlick`
+image (`SALTLICK_IMAGE`, default `ghcr.io/usareur-af/saltlick:v0.3.0`) behind a TLS front
+(`SALTLICK_TLS_IMAGE`, default `caddy:2.10`). Stage 05b takes `HG_SALTLICK`, the https URL of a
+directory you already run, in place of Docker.
 
 New to this? Read [`docs/what-you-will-learn.md`](docs/what-you-will-learn.md) first — the mental
 model in five ideas. Then [`STAGES.md`](STAGES.md) for what each stage asserts, what a failure
@@ -45,8 +47,8 @@ Federation is the exception, for a partner who must own their own authority and 
 
 ## The stages
 
-Stages 01–04 need no goatnet, no cloud and no credentials. Stage 05 needs Docker and the
-`saltlick` image; 05b a running directory. Stages 06–12 need two goatnets you have access to,
+Stages 01–04 need no goatnet, no cloud and no credentials. Stages 05 and 05b need Docker and the
+`saltlick` image, or for 05b a directory at `HG_SALTLICK`. Stages 06–12 need two goatnets you have access to,
 with a federation edge on each put there by their operators (you, if you are one), and the
 prerequisites listed in `STAGES.md`; without them they skip and the
 runner's last line says how many skipped.
@@ -57,8 +59,8 @@ runner's last line says how many skipped.
 | 02 | Every conformance package lints clean; every malformed fixture is refused | nothing |
 | 03 | Every composing pair reproduces its committed digest, in both orders | nothing |
 | 04 | A disagreeing pair is named, not merely reported as different | nothing |
-| 05 | The directory round-trips a package byte-exact and refuses what it must | Docker, `saltlick` image |
-| 05b | The directory used end to end — discover, corroborate, then compose | a running `saltlick` (`HG_SALTLICK`) |
+| 05 | The directory hosts a party's pointer, package and CA byte-exact, and refuses what it must | Docker, `saltlick` image |
+| 05b | Two parties federate through the directory — publish, fetch, check, read back, compose | Docker, or a directory at `HG_SALTLICK` |
 | 06 | `federate init` measures a real environment | a goatnet host (`HG_ENV_HOST`) |
 | 07 | The tunnel comes up under the composed agreement | two federation edges |
 | 08 | The peering edge terminates the relationship | two federation edges |
@@ -75,8 +77,8 @@ the operator procedure is
 
 ## What a green run covers
 
-- **Stages 01–05 are offline.** They prove the format, the tool and the directory agree with the
-  specification. They involve no tunnel, no fabric and no second party.
+- **Stages 01–05b are offline.** They prove the format, the tool and the directory agree with the
+  specification. They involve no tunnel and no fabric; 05b plays both parties on one machine.
 - **Stages 06–12 cover the software path between two goatnets.** Whether the two sides are
   separate sovereigns depends on where you run them: two goatnets under one set of cloud
   credentials prove the software path, not the separation.
@@ -86,7 +88,8 @@ the operator procedure is
 ```
 run                the runner (run.sh is an alias)
 lib/assert.sh      assertions, and the pass/fail tally
-lib/*.py           directory-entry signing and the directory flow (stages 05, 05b)
+lib/saltlick_up.sh a directory of our own: saltlick behind a TLS front (stages 05, 05b)
+lib/*.py           pointer, package and CA building, signed writes, the directory flow (05, 05b)
 stages/            one file per stage
 bundle/            the federation conformance bundle, as a counterparty receives it
 scenario/          the two notional sovereigns

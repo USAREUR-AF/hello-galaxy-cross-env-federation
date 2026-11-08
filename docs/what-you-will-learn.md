@@ -41,6 +41,26 @@ obligation, no notification timeline, no terms of termination. Those are decisio
 empowered to make them, recorded in a separate written instrument. The technical agreement is an
 annex to that instrument and never a substitute for it.
 
+## The directory, and what is left to people
+
+Packages move through a directory, `saltlick`: a public service on the internet, outside every
+party's network. Each party publishes a signed pointer — its sovereign id, where its package is
+served, that package's sha256, an expiry date — and uploads its signed package and its CA
+certificate beside it, so a party behind NAT needs no public host of its own. The other party
+fetches the package through the pointer and checks the digest, the signatures and the CA
+fingerprint itself. The directory is advisory: being listed grants nothing, and `compose` verifies
+a package only against the key bound by voice, never against anything the directory served.
+
+What people do, and nothing else:
+
+| Act | Who |
+|---|---|
+| Decide to federate, and what data flows | each party, on its own authority |
+| Read the verifying key and the CA fingerprint aloud, groups of four, and hear them read back | one call per party |
+| Read the agreement digest aloud after `compose` | the same call, or a second one |
+
+Everything between those acts is machine-driven and deterministic.
+
 ## How the stages map to the ideas
 
 | Idea | Proved by |
@@ -48,7 +68,8 @@ annex to that instrument and never a substitute for it.
 | The format is exact and implementable by someone else | 01, 02 — the bundle verifies itself; 46 packages lint clean and 11 malformed ones are refused |
 | The agreement has no perspective | 03 — 13 pairs reproduce their committed digest in **both** argument orders |
 | Disagreement is loud, not silent | 04 — a changed field is named; a trailing newline is reported as a byte difference, not a field one |
-| A directory makes introductions and decides nothing | 05 — `/v1/match` returns 404, and a second unbound key is refused |
+| A directory carries the exchange and decides nothing | 05 — `/v1/match` returns 404, stored bytes come back identical, a second unbound key is refused |
+| The only trust is the voice read-back | 05b — each party fetches the other's package through its pointer and checks it against the key and CA fingerprint read aloud; a key never bound is refused at composition |
 | Capabilities are measured, not typed | 06 — a value that cannot be derived exits 23 and names itself |
 | Names are derived | 07 — the live SA carries both derived names |
 | The edge terminates | 08 — one foreign authority per edge; the private subnet is unreachable |
@@ -57,8 +78,8 @@ annex to that instrument and never a substitute for it.
 
 ## What a green run covers
 
-- **Stages 01–05 are offline.** They prove the format, the tool and the directory agree with the
-  specification. No tunnel, no fabric, no second party.
+- **Stages 01–05b are offline.** They prove the format, the tool and the directory agree with the
+  specification. No tunnel, no fabric; 05b plays both parties on one machine.
 - **Stages 06–12 prove the software path between two goatnets.** Sovereignty separation is a
   property of where you run them: two goatnets reachable with one set of credentials do not
   demonstrate it.
