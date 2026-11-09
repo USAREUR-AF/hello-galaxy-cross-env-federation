@@ -2,6 +2,7 @@
 # `federate init` measures a real environment rather than being told about it
 set -uo pipefail
 . "$HG_ROOT/lib/assert.sh"
+. "$HG_ROOT/lib/fed.sh"
 
 # init reads the running system. Without one there is nothing to measure and a
 # pass here would mean nothing, so this skips loudly rather than inventing an
@@ -17,7 +18,7 @@ W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
 # cannot be derived must fail and name itself rather than be filled in, because
 # a capability an operator types is a claim and a wrong claim survives until the
 # link fails in front of a counterparty.
-"$GOAT_BIN" federate init --with-transport --with-data \
+fed init --with-transport --with-data \
     --signing-key "${HG_SIGNING_KEY:-$HG_ROOT/.work/hg-signing.hex}" \
     > "$W/ours.json" 2>"$W/err"
 rc=$?
@@ -25,7 +26,7 @@ rc=$?
 case $rc in
   0)
     ok "init produced a package from the running system"
-    "$GOAT_BIN" federate lint "$W/ours.json" --json >/dev/null 2>&1
+    fed lint "$W/ours.json" --json >/dev/null 2>&1
     [ $? -eq 0 ] && ok "and that package lints clean against the spec" \
                  || no "init produced a package its own linter refuses"
 

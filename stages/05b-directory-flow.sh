@@ -2,6 +2,7 @@
 # Two parties federate through the directory — publish, fetch, check, read back, compose
 set -uo pipefail
 . "$HG_ROOT/lib/assert.sh"
+. "$HG_ROOT/lib/fed.sh"
 B=$(cat "$HG_ROOT/.bundle-path" 2>/dev/null)
 [ -d "${B:-}" ] || { no "stage 01 must run first"; tally; exit 1; }
 python3 -c 'import cryptography' 2>/dev/null || { skip "python3 cryptography needed"; tally; exit 0; }
@@ -28,7 +29,7 @@ printf '%s\n' "$out" | while IFS= read -r l; do echo "  ${l#  }"; done
 KA=$(cat "$B/vectors/testkeys/xaa.public.b64"); KB=$(cat "$B/vectors/testkeys/xab.public.b64")
 NOW=$(tr -d '\n' < "$B/vectors/now.txt")
 digest() {
-  "$GOAT_BIN" federate compose "$1" "$2" --key "xaa=$KA" --key "xab=$KB" --now "$NOW" --json 2>/dev/null \
+  fed compose "$1" "$2" --key "xaa=$KA" --key "xab=$KB" --now "$NOW" --json 2>/dev/null \
     | python3 -c 'import json,sys;print(json.load(sys.stdin).get("digest",""))' 2>/dev/null
 }
 d_xaa=$(digest "$W/xaa.package.json" "$W/xaa/theirs.package.json")
@@ -41,6 +42,6 @@ assert_eq "xab composes the same agreement digest from its side" "$d_xaa" "$d_xa
 # The key read back is load-bearing: composition refuses a package under any
 # key but the one bound by voice, whatever the directory served.
 assert_exit "a key the directory never bound is refused at composition" 20 \
-  "$GOAT_BIN" federate compose "$W/xaa.package.json" "$W/xaa/theirs.package.json" \
+  fed compose "$W/xaa.package.json" "$W/xaa/theirs.package.json" \
     --key "xaa=$KA" --key "xab=$KA" --now "$NOW" --json
 tally
