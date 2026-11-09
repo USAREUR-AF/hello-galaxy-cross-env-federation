@@ -16,7 +16,7 @@ consumes the interfaces that exist for a counterparty:
 
 | Interface | What it is |
 |---|---|
-| `goat` CLI | a released binary from [`usareur-af/goatcore` releases](https://github.com/usareur-af/goatcore/releases) |
+| `goat` CLI | a released binary from [`usareur-af/goatcore` releases](https://github.com/usareur-af/goatcore/releases); or `goatbuilder`, see [below](#goat-federate-today-goatbuilder-federate-next) |
 | The federation bundle | `federation-package-spec.md`, the conformance vectors and `verify-bundle.sh`, exactly as a counterparty receives them (`bundle/`) |
 | `saltlick` | the peering-directory image, used by stages 05 and 05b |
 
@@ -31,7 +31,8 @@ source it would prove nothing that `cargo test` does not already prove.
 ./run --list       # what each stage is
 ```
 
-Requirements: `bash`, `python3`, `tar`, and a `goat` binary on `PATH` or at `$GOAT_BIN`.
+Requirements: `bash`, `python3`, `tar`, and a `goat` binary on `PATH` or at `$GOAT_BIN`
+(or, with `FED_TOOL=goatbuilder`, a `goatbuilder` binary on `PATH` or at `$GOATBUILDER_BIN`).
 Stages 05 and 05b additionally need `pip install cryptography`, and Docker to run the `saltlick`
 image (`SALTLICK_IMAGE`, default `ghcr.io/usareur-af/saltlick:v0.3.0`) behind a TLS front
 (`SALTLICK_TLS_IMAGE`, default `caddy:2.10`). Stage 05b takes `HG_SALTLICK`, the https URL of a
@@ -75,6 +76,41 @@ and [`docs/tutorials/04-two-sovereigns.md`](https://github.com/usareur-af/goatco
 the operator procedure is
 [`docs/operations/sovereign-federation-runbook.md`](https://github.com/usareur-af/goatcore/blob/main/docs/operations/sovereign-federation-runbook.md).
 
+## `goat federate` today, `goatbuilder federate` next
+
+Federation is moving from `goat` into `goatbuilder`. The package verbs these stages run (`init`,
+`lint`, `compose`, `diff`) keep the same flags and exit codes there, and both tools run the same
+code, so every stage asserts the same thing whichever tool runs it. The stages call them through
+one function, `fed` in `lib/fed.sh`:
+
+```
+./run                                   # goat federate <verb>: the released goat CLI (the default)
+FED_TOOL=goatbuilder ./run              # goatbuilder federate <verb>
+```
+
+Status: WIP — gate: the federation end-to-end test drives both sides with goatbuilder federate alone.
+
+`FED_TOOL=goatbuilder` needs the first goatbuilder release that carries the federate verbs; the
+runner refuses an older goatbuilder rather than let it read a verb as a partner name. CI keeps
+testing the released `goat` CLI, which is what partner environments run today; a `goat` that
+already carries the move still runs every verb and prints one line on stderr naming the
+goatbuilder command.
+
+Between two goatnets, the peering is becoming one command on each side, `goatbuilder federate
+<partner>`, with the stages `plan`, `deploy`, `test` and `status`, each also runnable alone. Each
+operator makes one decision: the partner, and the release sets it receives, which the deployment's
+`federation.toml` owns and a peering entry may only narrow. Two confirmations stay human: the
+verifying keys and CA fingerprints read aloud with the agreement digest compared, and approval of
+what the core admits, including the reviewed configuration change, bound to the plan's hash. Live
+prerequisites are checked again just before any change, and a re-run resumes by inspecting actual
+state, guided by the run journal in the working directory. Acceptance is a bilateral session whose
+checks read PASS, FAIL, BLOCKED, SKIP or NOT APPLICABLE; a required check never passes on a skip,
+and the operators exchange result bundles by file. Publishing `exchanging` afterwards is a third
+deliberate act by both operators, through a reviewable change. Until each stage's default switch
+lands, today's procedure stays the default. The operator procedure is goatcore's
+[`docs/operations/sovereign-federation-runbook.md`](https://github.com/usareur-af/goatcore/blob/main/docs/operations/sovereign-federation-runbook.md),
+step 1.
+
 ## What a green run covers
 
 - **Stages 01–05b are offline.** They prove the format, the tool and the directory agree with the
@@ -88,6 +124,7 @@ the operator procedure is
 ```
 run                the runner (run.sh is an alias)
 lib/assert.sh      assertions, and the pass/fail tally
+lib/fed.sh         the federation verbs, from goat or goatbuilder (FED_TOOL)
 lib/saltlick_up.sh a directory of our own: saltlick behind a TLS front (stages 05, 05b)
 lib/*.py           pointer, package and CA building, signed writes, the directory flow (05, 05b)
 stages/            one file per stage

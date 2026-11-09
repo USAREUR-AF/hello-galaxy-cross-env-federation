@@ -1,6 +1,7 @@
 # The stages
 
-What each one asserts, and what a failure means. Stages 01–04 need nothing but the `goat` binary;
+What each one asserts, and what a failure means. Stages 01–04 need nothing but the `goat` binary
+(or `goatbuilder`, with `FED_TOOL=goatbuilder`; see the README);
 stages 05 and 05b need Docker and the `saltlick` image, or for 05b a directory at `HG_SALTLICK`;
 stages 06–12 need goatnets and the prerequisites below.
 

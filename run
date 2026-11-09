@@ -5,7 +5,9 @@ cd "$(dirname "$0")"
 export HG_ROOT="$PWD"
 
 : "${GOAT_BIN:=$(command -v goat || true)}"
-export GOAT_BIN
+: "${FED_TOOL:=goat}"
+: "${GOATBUILDER_BIN:=$(command -v goatbuilder || true)}"
+export GOAT_BIN FED_TOOL GOATBUILDER_BIN
 
 usage() {
   echo "usage: ./run [--list] [stage...]"
@@ -26,14 +28,40 @@ if [ "${1:-}" = "--list" ]; then
 fi
 [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ] && { usage; exit 0; }
 
-if [ -z "$GOAT_BIN" ] || [ ! -x "$GOAT_BIN" ]; then
-  echo "no goat binary. Put one on PATH or set GOAT_BIN." >&2
-  echo "Releases: https://github.com/usareur-af/goatcore/releases (goat-cli-v*)" >&2
-  exit 2
-fi
+# The federation verbs come from `goat` (the default, what partners run today) or
+# from `goatbuilder` (FED_TOOL=goatbuilder), which they are moving to. lib/fed.sh.
+case "$FED_TOOL" in
+  goat)
+    if [ -z "$GOAT_BIN" ] || [ ! -x "$GOAT_BIN" ]; then
+      echo "no goat binary. Put one on PATH or set GOAT_BIN." >&2
+      echo "Releases: https://github.com/usareur-af/goatcore/releases (goat-cli-v*)" >&2
+      exit 2
+    fi ;;
+  goatbuilder)
+    if [ -z "$GOATBUILDER_BIN" ] || [ ! -x "$GOATBUILDER_BIN" ]; then
+      echo "FED_TOOL=goatbuilder and no goatbuilder binary. Put one on PATH or set GOATBUILDER_BIN." >&2
+      echo "Releases: https://github.com/usareur-af/goatcore/releases (goatbuilder/v*)" >&2
+      exit 2
+    fi
+    # An older goatbuilder reads `federate lint` as a peering named "lint"; its
+    # help then shows no `federate lint` usage line. Refuse it rather than run it.
+    if ! "$GOATBUILDER_BIN" federate lint --help 2>/dev/null | grep -q 'federate lint'; then
+      echo "$("$GOATBUILDER_BIN" --version 2>/dev/null || echo "$GOATBUILDER_BIN") has no 'federate lint' verb." >&2
+      echo "FED_TOOL=goatbuilder needs the first goatbuilder release that carries the federate verbs;" >&2
+      echo "unset FED_TOOL to run the stages with the released goat CLI." >&2
+      exit 2
+    fi ;;
+  *)
+    echo "FED_TOOL is '$FED_TOOL'; it is goat (the default) or goatbuilder." >&2
+    exit 2 ;;
+esac
 
 echo
-echo "  goat:   $("$GOAT_BIN" --version 2>/dev/null || echo "$GOAT_BIN")"
+if [ "$FED_TOOL" = goatbuilder ]; then
+  echo "  federate: goatbuilder federate ($("$GOATBUILDER_BIN" --version 2>/dev/null || echo "$GOATBUILDER_BIN"))"
+else
+  echo "  federate: goat federate ($("$GOAT_BIN" --version 2>/dev/null || echo "$GOAT_BIN"))"
+fi
 echo "  bundle: $(ls bundle/*.tar.gz 2>/dev/null | head -1 || echo 'will be fetched')"
 
 want=("$@")

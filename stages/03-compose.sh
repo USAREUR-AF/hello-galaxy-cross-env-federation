@@ -2,6 +2,7 @@
 # Every composing pair reproduces its committed digest, in both orders
 set -uo pipefail
 . "$HG_ROOT/lib/assert.sh"
+. "$HG_ROOT/lib/fed.sh"
 B=$(cat "$HG_ROOT/.bundle-path" 2>/dev/null)
 [ -d "${B:-}" ] || { no "stage 01 must run first (no unpacked bundle)"; tally; exit 1; }
 
@@ -9,7 +10,7 @@ KA=$(cat "$B/vectors/testkeys/xaa.public.b64"); KB=$(cat "$B/vectors/testkeys/xa
 NOW=$(tr -d '\n' < "$B/vectors/now.txt")
 
 digest_of() { # $1 dir, $2 first, $3 second
-  "$GOAT_BIN" federate compose "$1/$2" "$1/$3" --key "xaa=$KA" --key "xab=$KB" --now "$NOW" --json 2>/dev/null \
+  fed compose "$1/$2" "$1/$3" --key "xaa=$KA" --key "xab=$KB" --now "$NOW" --json 2>/dev/null \
     | python3 -c 'import json,sys
 try: print(json.load(sys.stdin).get("digest",""))
 except Exception: print("")'
@@ -40,7 +41,7 @@ for d in "$B"/vectors/refuse-*; do
   [ -d "$d" ] || continue
   set -- $(ls "$d" | grep -E '^package-.*\.canonical\.json$' | grep -v signing-input)
   [ $# -eq 2 ] || { note "$(basename "$d"): expected 2 packages, found $#"; continue; }
-  "$GOAT_BIN" federate compose "$d/$1" "$d/$2" \
+  fed compose "$d/$1" "$d/$2" \
       --key "xaa=$KA" --key "xab=$KB" --now "$NOW" --json >/dev/null 2>&1
   rc=$?; n=$((n+1))
   [ "$rc" -eq 20 ] || { wrong=$((wrong+1)); note "$(basename "$d") exited $rc, expected 20"; }
@@ -52,7 +53,7 @@ done
 # A wrong key must break composition. Nothing in the bundle pins this, and a
 # composer that ignored --key would pass every check above.
 d="$B/vectors/compose-full"
-"$GOAT_BIN" federate compose "$d/package-xaa.canonical.json" "$d/package-xab.canonical.json" \
+fed compose "$d/package-xaa.canonical.json" "$d/package-xab.canonical.json" \
     --key "xaa=$KB" --key "xab=$KA" --now "$NOW" --json >/dev/null 2>&1
 rc=$?
 [ "$rc" -ne 0 ] && ok "swapping the two parties' verifying keys is refused (exit $rc)" \
