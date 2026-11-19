@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 610" width="880" height="610" role="img" aria-label="Two notional sovereigns, xaa and xab, each keep their own goatnet, certificate authority and identity plane. Each publishes a signed half-agreement, its pointer, package and CA certificate through the saltlick directory, which is public and grants nothing. Both compose the halves into one agreement with the same digest in either order, and a changed field is named. Each side runs a federation edge holding exactly one foreign authority; the tunnel between them comes up under derived names and data crosses both ways, read back from storage. Stages 01 to 05b run offline on one machine; 06 to 12 need two goatnets."><title>Two sovereigns exchange data without joining each other's networks</title><style>svg{--ink:#e7e9ec; --quiet:#a5acb7; --rule:#30363e; --line:#7b8592; --paper:#121417; --panel:#1a1d21; --accent:#6cc3da; --accent-soft:#14303a; --on-accent:#121417; --good:#6fc480; --good-bg:#1b2e20; --warn:#e2b04e; --warn-bg:#32291a; --info:#86b3ea; --info-bg:#1a2636; --crit:#f08b80; --crit-bg:#3a1f1f; font-family:'Helvetica Neue', Helvetica, Arial, 'Liberation Sans', sans-serif}.t{fill:var(--ink)} .tq{fill:var(--quiet)} .ta{fill:var(--accent)} .tg{fill:var(--good)}
+.tw{fill:var(--warn)} .ti{fill:var(--info)} .tc{fill:var(--crit)} .ton{fill:var(--on-accent)}
+.bx{fill:var(--panel);stroke:var(--line);stroke-width:1.25} .bxa{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.bxg{fill:var(--good-bg);stroke:var(--good);stroke-width:1.25} .bxc{fill:var(--crit-bg);stroke:var(--crit);stroke-width:1.25}
+.bxw{fill:var(--warn-bg);stroke:var(--warn);stroke-width:1.25} .bxi{fill:var(--info-bg);stroke:var(--info);stroke-width:1.25}
+.zone{fill:none;stroke:var(--line);stroke-width:1.25;stroke-dasharray:6 5}
+.ln{stroke:var(--line);stroke-width:1.5;fill:none} .lna{stroke:var(--accent);stroke-width:2.25;fill:none}
+.lng{stroke:var(--good);stroke-width:2;fill:none} .lnc{stroke:var(--crit);stroke-width:2;fill:none;stroke-dasharray:4 4}
+.lni{stroke:var(--info);stroke-width:2;fill:none} .lnr{stroke:var(--rule);stroke-width:1;fill:none}
+.fa{fill:var(--accent)} .fl{fill:var(--line)} .fg{fill:var(--good)} .fc{fill:var(--crit)} .fi{fill:var(--info)}
+.halo{paint-order:stroke fill;stroke:var(--paper);stroke-width:5px;stroke-linejoin:round}</style>
+<text x="24" y="38" class="t" font-size="20" font-weight="700" data-role="note">Two sovereigns exchange data without joining each other's networks</text>
+<text x="24" y="66" class="tq" font-size="15" data-role="note">Each side keeps its own network, certificate authority and identity plane. They agree on one document, prove they</text>
+<text x="24" y="87" class="tq" font-size="15" data-role="note">hold the same one, and connect only through an edge built for that partner.</text>
+<text x="36" y="137" class="t" font-size="16" font-weight="700">Sovereign xaa</text>
+<text x="36" y="157" class="tq" font-size="14">own CA, own identity plane</text>
+<text x="648" y="137" class="t" font-size="16" font-weight="700">Sovereign xab</text>
+<text x="648" y="157" class="tq" font-size="14">own CA, own identity plane</text>
+<rect x="32" y="175" width="204" height="79.3" rx="8" class="bx"/>
+<text x="44" y="202" class="t" font-size="15" font-weight="700">Signed half</text>
+<text x="44" y="221.7" class="tq" font-size="14">its pointer, package and</text>
+<text x="44" y="241" class="tq" font-size="14">CA certificate</text>
+<rect x="644" y="175" width="204" height="79.3" rx="8" class="bx"/>
+<text x="656" y="202" class="t" font-size="15" font-weight="700">Signed half</text>
+<text x="656" y="221.7" class="tq" font-size="14">its pointer, package and</text>
+<text x="656" y="241" class="tq" font-size="14">CA certificate</text>
+<rect x="288" y="175" width="304" height="98.3" rx="8" class="bx"/>
+<rect x="300" y="188.6" width="61.8" height="30" rx="15" class="fa"/>
+<text x="330.9" y="208.2" class="ton" font-size="13" text-anchor="middle" font-weight="700">05, 05b</text>
+<text x="369.8" y="209" class="t" font-size="15" font-weight="700">saltlick directory</text>
+<text x="300" y="235.7" class="tq" font-size="14">public, outside both networks</text>
+<text x="300" y="260" class="tq" font-size="14">listing grants nothing</text>
+<path d="M236 203L288 203" class="lna"/>
+<path d="M288 203L278 208L278 198z" class="fa"/>
+<path d="M236 203L246 198L246 208z" class="fa"/>
+<path d="M644 203L592 203" class="lna"/>
+<path d="M592 203L602 198L602 208z" class="fa"/>
+<path d="M644 203L634 208L634 198z" class="fa"/>
+<rect x="288" y="313.3" width="304" height="98.3" rx="8" class="bxa"/>
+<rect x="300" y="326.9" width="53.6" height="30" rx="15" class="fa"/>
+<text x="326.8" y="346.5" class="ton" font-size="13" text-anchor="middle" font-weight="700">03, 04</text>
+<text x="361.6" y="347.3" class="t" font-size="15" font-weight="700">One agreement, one digest</text>
+<text x="300" y="374" class="tq" font-size="14">same digest on both sides, in either order</text>
+<text x="300" y="398.4" class="tq" font-size="14">a changed field is named</text>
+<rect x="32" y="322.8" width="204" height="79.3" rx="8" class="bx"/>
+<text x="44" y="349.8" class="t" font-size="15" font-weight="700">Checked by voice</text>
+<text x="44" y="369.5" class="tq" font-size="14">the other side's key and</text>
+<text x="44" y="388.9" class="tq" font-size="14">CA fingerprint, read aloud</text>
+<rect x="644" y="322.8" width="204" height="79.3" rx="8" class="bx"/>
+<text x="656" y="349.8" class="t" font-size="15" font-weight="700">Checked by voice</text>
+<text x="656" y="369.5" class="tq" font-size="14">the other side's key and</text>
+<text x="656" y="388.9" class="tq" font-size="14">CA fingerprint, read aloud</text>
+<path d="M238 362.5L286 362.5" class="ln"/>
+<path d="M286 362.5L276 367.5L276 357.5z" class="fl"/>
+<path d="M642 362.5L594 362.5" class="ln"/>
+<path d="M594 362.5L604 357.5L604 367.5z" class="fl"/>
+<path d="M440 275.3L440 311.3" class="ln"/>
+<path d="M440 311.3L435 301.3L445 301.3z" class="fl"/>
+<rect x="32" y="455.7" width="204" height="98.3" rx="8" class="bxg"/>
+<rect x="44" y="469.3" width="31" height="30" rx="15" class="fa"/>
+<text x="59.5" y="488.9" class="ton" font-size="13" text-anchor="middle" font-weight="700">08</text>
+<text x="83" y="489.7" class="t" font-size="15" font-weight="700">Federation edge</text>
+<text x="44" y="516.4" class="tq" font-size="14">holds exactly one</text>
+<text x="44" y="540.7" class="tq" font-size="14">foreign authority</text>
+<rect x="644" y="455.7" width="204" height="98.3" rx="8" class="bxg"/>
+<rect x="656" y="469.3" width="31" height="30" rx="15" class="fa"/>
+<text x="671.5" y="488.9" class="ton" font-size="13" text-anchor="middle" font-weight="700">08</text>
+<text x="695" y="489.7" class="t" font-size="15" font-weight="700">Federation edge</text>
+<text x="656" y="516.4" class="tq" font-size="14">holds exactly one</text>
+<text x="656" y="540.7" class="tq" font-size="14">foreign authority</text>
+<path d="M236 485.7L644 485.7" class="lng"/>
+<path d="M644 485.7L634 490.7L634 480.7z" class="fg"/>
+<path d="M236 485.7L246 480.7L246 490.7z" class="fg"/>
+<rect x="294" y="448.7" width="31" height="30" rx="15" class="fa"/>
+<text x="309.5" y="468.3" class="ton" font-size="13" text-anchor="middle" font-weight="700">07</text>
+<text x="335" y="468.7" class="t" font-size="14">tunnel under derived names</text>
+<text x="328" y="511.7" class="tq" font-size="13" font-family="Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace">fed.&lt;issuer&gt;.&lt;counterparty&gt;.01</text>
+<rect x="294" y="520.7" width="31" height="30" rx="15" class="fa"/>
+<text x="309.5" y="540.3" class="ton" font-size="13" text-anchor="middle" font-weight="700">09</text>
+<text x="335" y="540.7" class="t" font-size="14">data both ways, read back from storage</text>
+<rect x="24" y="111" width="220" height="455" rx="12" class="zone"/>
+<rect x="636" y="111" width="220" height="455" rx="12" class="zone"/>
+<text x="24" y="598" class="tq" font-size="14" data-role="note">Stages 01 to 05b run offline on one machine. Stages 06 to 12 need two goatnets.</text>
+</svg>

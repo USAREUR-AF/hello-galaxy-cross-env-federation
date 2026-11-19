@@ -1,5 +1,10 @@
 # hello-galaxy-cross-env-federation
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/two-sovereigns-dark.svg">
+  <img src="docs/figures/two-sovereigns-light.svg" width="760" alt="Two notional sovereigns, xaa and xab, each keep their own goatnet, certificate authority and identity plane. Each publishes a signed half-agreement, its pointer, package and CA certificate through the saltlick directory, which is public and grants nothing. Both compose the halves into one agreement with the same digest in either order, and a changed field is named. Each side runs a federation edge holding exactly one foreign authority; the tunnel between them comes up under derived names and data crosses both ways, read back from storage. Stages 01 to 05b run offline on one machine; 06 to 12 need two goatnets.">
+</picture>
+
 **Two organisations that will not join each other's networks, will not vouch for each other's
 identities, and cannot inspect each other's systems — exchanging data anyway, and proving it.
 Run the offline half of the proof in one command.**
